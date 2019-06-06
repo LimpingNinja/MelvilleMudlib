@@ -1,0 +1,5 @@
+This directory holds files commonly included into other files. Most of
+the mudlib defines are in config.h. The list of admin characters is in
+admin.h. Other includable files are here too. The compiler will automatically
+search in this directory when it encounters an include directive. The
+driver automatically places several includable files here when it starts.

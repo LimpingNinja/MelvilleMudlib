@@ -1,0 +1,48 @@
+This document describes those functions defined in /inherit/room.c, which
+should be inherited by any object intended to hold players. room.c also
+inherits container.c and the functions in that object, described in
+contfuns, are also defined in room.c. The exact syntax of each declaration
+is given, followed by a brief description of the function.
+  
+void set_exits (mapping ex) ;
+set_exits() sets a mapping of exits the player may use with the go command
+in this room. The keys are the direction in which the exit leads and the
+values are the file name of the object to which the exit leads.
+
+void add_exit (string direction, string file) ;
+add_exits() adds an exit to the mapping of exits.
+
+mapping query_exits() ;
+query_exits() returns a copy of the exit mapping.
+
+string query_exit (string direction) ;
+query_exit() returns the file name of the room than lies in the passed
+direction from this room.
+
+int prevent_get() ;
+prevent_get() returns 1 and prevents a player from picking up the room
+using the get command. It might be wise to prevent rooms from being
+moved at all, but the lib currently does not do so.
+
+varargs string query_long (int brief) ;
+query_long() overrides the function defined in object. It returns the
+long description of the room as set with set_long(), plus the names of
+the exits from the room and a list of the room's contents. If the
+optional brief arg is equal to 1, then the short description of the
+room will be used instead of the long. The exits list and the contents
+will be printed as usual.
+
+varargs void room_tell (string str, object *excluded) ;
+room_tell() passes a message to every living object in the room. If the
+optional argument, which is an array of objects, then any object in that
+list will not receive the message. Note that the current player _will_
+receive the message unless specifically excluded.
+
+int catch_tell (string str) ;
+catch_tell() is called any time the say() autofun or room_tell() roomfun
+is invoked. It gives the room a chance to examine the string and take
+any appropriate action (say, write it to a file or check for a particular
+string to trigger an event). If it returns 1, the say or tell proceeds
+normally: if 0, the say is aborted and the users never see the message.
+In the default room it always returns 1 and does nothing: you can override
+it as you see fit.

@@ -1,0 +1,5 @@
+This directory stores commands accessible to all players. When the
+player types "foo bar", the function do_command() is called in foo.c
+with "bar" passed as a string argument.
+You may want to move some of these commands, notably mail and tell, to
+the wizard command directory if you don't want players to access them.

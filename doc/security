@@ -1,0 +1,119 @@
+All object permissions in Melville are based, ultimately, on the file
+name of the object. Whenever an object is loaded, two variables are
+set in that object, both strings: permissions and creator. The values
+of these strings are based on the file name of the object, and are used
+to group similar objects into categories that have the same permissions.
+These strings can be set to any value in principle: the idea is that two
+objects with the same permissions should have the same values for privileges
+and creator. Then, when an object attempts to read or write a file, the
+auto object needs only consider the permissions and creator of that
+object and not have to worry about the exact file name.
+
+The values of privileges and creator are set in the functions
+set_privileges() and set_creator() which are in /system/auto/security.c.
+These functions take no arguments. They parse the file name of the
+object (and, in the case of user and player objects, the name of the
+player as well) and assign the privileges string and creator string.
+They are called automatically by the init_object() function, which is
+called by the driver whenever an object is loaded. They can be called
+again at any time: but since the file name of the object will not have
+changed, the privileges and creator string won't change either. The
+only exception is that a user or player object which doesn't have a
+name assigned yet (because the player is in the process of logging in)
+gets a temporary privileges and creator string. After the name and a
+valid password have been entered, set_privileges() and set_creator() are
+called again and the new values based on the name are set.
+
+Exactly what strings are set is determined by the two functions. You
+can change the code of those functions to assign any value you like.
+However, the default system is as follows. For privileges:
+User and player objects get one of four privileges. Before the player
+enters his name, they get the privileges string "login". After the name
+is entered, they get permissions of either "admin", "wizard", or "player"
+depending on the position of the user. The wizard variable in player.c
+and user.c controls whether a user is a wizard or not. The names of the
+admins are defined in /include/admin.h.
+Any object loaded from a wizard's directory gets the name of the wizard
+as its privileges. Note that this will _not_ be the same as the privileges
+of the wizard himself, which will be "wizard" (or "admin"). Thus objects
+from a wizard's directory do not have the same permissions as the wizard
+himself does, which is much safer than the traditional method where both
+had the name of the wizard for a UID. For example, if one wizard clones
+an object from the directory of another, the creator string will have the
+name of the wizard who cloned the object (see below) and the privileges
+string will have the name of the wizard who wrote the file.
+Any object loaded from /cmds will get "commands" as a privilege string,
+and any object loaded from /system will get "system". All other objects
+get the default string of "object".
+
+The creator string is simpler. User and player objects get the name
+of the player as creator. All other objects get the creator of
+this_user() as their own creator: if this_user() isn't defined they
+get "driver" as their creator, since any object loaded with no user
+defined must have been loaded via an apply call. Since the creator
+of this_user() is the name of the player, the creator string will be
+the name of the player that caused the object to load.
+For some objects, the creator string isn't too meaningful. For example,
+a command will get the name of the first player to use it as its creator.
+However, for any cloned object, the name of the player who caused it to
+be cloned (either by using the clone command, or by loading a room or
+other object which caused the given object to load) will be the creator.
+This may or may not be useful in all cases, but it does let you know
+who caused an object to be in the game in the first place.
+
+The security strings are used for two purposes: controlling command
+and file access. Command access is only an issue for player objects,
+and the rule is simple: any privileges string can use /cmds/player
+commands, only "wizard" and "admin" can use /cmds/wizard, and only
+"admin" can use /cmds/admin. All handling is done in command() which
+is defined in /system/player.c.
+File access is somewhat more complicated. Whether a given object has
+permissions to read or write to a file is determined by two functions,
+both defined in /system/auto/security.c, called valid_read() and
+valid_write(). The only exception is that permission to use save_object()
+is handled differently (see below). These two functions consider the
+privileges of an object and return 1 if permission is granted and 0 if it
+is not.
+The rules for read access are very simple: any object can read any
+file. The only exception is that /data can be read only by admins and
+by the user, player, and mail objects. This is to keep people's mail and
+their encrypted passwords secure from prying eyes.
+mail, encrypted passwords, and other data cannot be read except by
+system objects.
+The rules for write access are more complex. Any admin and any command
+can write anywhere. (The file-handling commands need this permission, but
+rather than sort them we give permission to all commands.) Objects with
+"wizard" permission can write to that wizard's directory. (Note that
+this means the wizard can do so, but objects cloned from his directory -
+which have the wizard's name as privileges - cannot do so. This is
+true even for objects loaded from an admin's directory.) Any user
+object can use the log_file() function to write to /log. (Player
+objects may not.) All other write attempts are denied.
+Note that the commands such as rm, cp, and mv automatically have
+write permissions. Thus they must check the permissions of the
+player that called them, and not allow that player to use the
+command if he does not have the appropriate permissions. They can
+(and do) call valid_read() and valid_write() to make these checks.
+
+In addition, any object may use the functions disable_read() and
+disable_write() to turn off all reading and writing privileges they
+would normally have. There is no way to turn these privileges back
+on.
+
+All of the kfuns which read and write files are overridden by the file
+/system/auto/overrides.c to call valid_read or valid_write before the
+kfun is invoked. valid_ed_read() and valid_ed_write(), defined in
+the driver object /system/driver.c, also call these functions to
+determine whether a player may edit a file or save changes if he
+does edit it.
+
+The only kfuns which access files but do not invoke valid_read() or
+valid_write() are save_object() and restore_object(). The rules for
+these are simple, and are enforced in the overrides of these kfuns
+defined in /system/auto/override.c. User and player objects may save to
+the appropriate file in /data/user and /data/player. All other objects
+may save only to the file which has the same base name as the object
+but ends in .dat instead of .c. (Ie, /world/board.c may save to the
+file /world/board.dat and nowhere else.)
+restore_object() is not secured at the moment: any object may restore
+values from any file if it wants to.

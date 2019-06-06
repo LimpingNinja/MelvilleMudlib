@@ -1,0 +1,74 @@
+Congratulations! You have just downloaded the Melville mudlib for the
+DGD driver. This document assumes you have succesfully compiled the
+driver already and have just untarred the mudlib. It gives instructions
+for bringing the mudlib on-line and setting yourself up as the admin
+(or admins) of the mud.
+You should follow the steps given in this document in order, and you
+should not do anything else until you have reached the end of these
+steps. If you do that, you should get the mudlib set up properly and
+be ready to begin using it.
+
+1) This mudlib untarred into a single directory, called melville, which
+contains 10 subdirectories, the mudlib config file Melvmud, an
+introductory file Introduction, your license for using this software, and
+this README file. You should read the license since it explains what
+you may and may not do with this software. You do not need to move
+this directory, but you may want to put it on the same level as the
+driver source directory, or the driver executable, or anywhere else
+you want to put it. You will definitely want to put the melvmud config
+file into the same directory as the driver executable, to simplify
+starting the mud.
+
+2) Edit the melvmud file to change any of the options you would like
+changed. The only one you must change is the mudlib directory path
+option, to match the location of the mudlib directory in your file
+system. You must specify the absolute path. You may also wish to
+change the maximum number of users (default 2), the maximum size of
+an array (default 1000), the listening port (Melville uses 1863) or
+other options.
+
+3) Edit the file melville/include/admin.h to add yourself to the list
+of admins. You may want to delete the mobydick character from this list,
+and you might want to delete the mobydick character altogether.
+
+4) Start up the driver executable specifying the melvmud file as the
+configuration file. You may want to place this job in background, or
+you may want to use the rundgd script that comes with the driver. You
+may also want to redirect the standard error to a file visible from
+within the mudlib. The command I use to start the driver is
+
+dgd.exe Melvmud >& ../melville/log/driver &
+
+or
+
+dgd.exe Melvmud Dumpfile >& ../melville/log/driver &
+
+if I start from a dump.
+
+The file /include/version.h in the mudlib gives the driver version that
+was current when this version of the mudlib was released. This release
+should work unaltered on that version of DGD. Earlier or later versions
+of DGD may not be compatible and may require some alterations to the
+mudlib.
+
+5) Telnet into the mud and create your admin character. You will
+automatically be given wizard status. If you added yourself to the
+admin list in step 3, you will also be given admin status.
+
+6) Either from within the mud or from outside it, read the file
+/doc/Melville. This describes the mudlib briefly and gives you
+a guide where to look for more information.
+
+7) Read the other files in /doc. There are three which describe parts of
+the operation of the mudlib in more detail: /doc/security, /doc/directories,
+and /doc/cmd_parsing. You should read these closely. The other important
+documents are found in /doc/functions and describe the functions defined
+by the important objects of the mudlib. You may also want to simlink your
+kfun documents to this directory so they can be accessed within the mudlib.
+
+8) When you think you have things under control, add the rest of your
+admin characters to the admins.h define, and allow your other admins
+and wizards to create their characters. Then alter /include/options.h
+to turn off the autowiz option.
+
+Enjoy the lib!

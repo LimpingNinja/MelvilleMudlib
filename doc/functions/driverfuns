@@ -1,0 +1,108 @@
+This document describes all the functions defined in the driver object
+and gives the exact syntax of their declarations.
+
+static void initialize() ;
+initialize() is called by the driver when it starts up. It is the place
+to load any objects that need to be loaded when the first user connection
+is made or any other calls that have to be done before then. Right now
+it loads user.c, player.c, the user daemon, and the start room.
+
+static void swapswap() ;
+swapswap() is called every 15 minutes and invokes the swapout() kfun.
+This saves memory by saving unused objects to disk. See the manual page
+on the kfun for more information.
+
+static void restored() ;
+This re-initializes the system after a restore. It is called when the
+game is restored from a state dump. The Melville lib does not call it:
+the code is exactly the same as that from the 2.4.5 simul.
+
+string path_read(string path) ;
+This is used by the editor to convert a path passed to the editor() kfun,
+or the "r" command in the driver, to a full path name (starting from the
+root mudlib directory. If it returns 0, read access is denied to that
+editor instance. In the Melville lib, it does no processing: it just 
+checks for valid read permissions. Thus you must always invoke the
+editor kfun using full path names.
+
+string path_write(string path) ;
+This is used by the editor to convert a path at write time. If it returns
+0, write access is denied. This one also does no processing of the path,
+just checks for permissions.
+
+object call_object(string path) ;
+This one is called whenever the driver needs to convert a string name
+into an object path. It checks to make sure that there are no .. in
+the path, and strips off a trailing .c if one was provided. Then it
+finds the object, compiling it if needed, and returns it.
+
+object inherit_program (string file, string path) ;
+This is called whenever the compiler sees an inherit statement in an
+object. It gives the compiler the chance to parse the path of the
+inherited file or check to make sure access is permitted. It does the
+same as path_object() above.
+
+string path_include(string file, string path) ;
+path_include() is called whenever the compiler sees an include statement
+in an object. It adds "/include/" to the filename whenever necessary.
+
+static object compile_object(string file) ;
+compile_object() is called whenever the driver tries to load an object
+and finds no file to load it from. It can be used to access a virtual
+object facility, but it currently does nothing. If it returns 0, a
+"file not found" error is generated: if it returns an object, then
+that object is used as if it had been compiled from the file. In the
+current implementation it always returns 0.
+
+static void recompile(object obj) ;
+recompile() is called any time an object is recompiled. Another mystery
+of DGD. Right now it always returns 0.
+
+static object telnet_connect() ;
+telnet_connect is called whenever a telnet connection is made on the driver's
+telnet port. The returned object is used to store the connection to the
+remote link with that user. Any necessary preprocessing can be done before
+the object is returned. In the Melville lib, a user object and a player
+object are cloned and a pointer is et in each object to the other, before
+the user.c clone is returned.
+
+static object binary_connect() ;
+binary_connect() is called whenever a telnet connection is made on the
+binary port. It just returns 0 in DGD. You could have some kind of
+remote mud finger, or ftp, or other sort of thing on this line.
+
+static void runtime_error(string error, int caught, int ticks) ;
+log_error() is called whenever a runtime error is detected. It must
+print an appropriate message to the user at the time and may log the
+event as well.
+
+void compile_error (string file, int line, string err) ;
+compile_error() is called whenever a compile-time error is detected.
+It writes the message to the user and to the appropriate log.
+
+static void interrupt() ;
+This is called by the driver when the process is interrupted.
+It forces everyone to quit and shuts the game down.
+
+static void remove_program() ;
+This is called by the driver whenever the master program of an
+object is removed (because neither the object, nor anything that
+was cloned from it or inherited it and still needs its code, is
+left). In Melville it does nothing, although it could be used
+for resource tracking.
+
+int compile_rlimits (string objname) ;
+compile_rlimits() is invoked whenever an object is being compiled
+that users the rlimits construct to change the amount of stack
+depth or eval cost available to it. If it returns 0, the object
+won't compile; if it returns 1, the object will compile, but the
+rlimits will be verified again at runtime (see below). In Melville
+this always returns 1. You may want to change that if you fear
+that people might create infinite loops or do other things with
+rlimits you don't want them to do.
+
+int runtime_rlimits (object obj, int depth, int ticks) ;
+runtime_rlimits() is used to verify changes in rlimits when an
+code which contains an rlimits construct is run. The change is
+denied if it returns 0, permitted if it returns 1. In Melville
+it always returns 1; same caveat as above.

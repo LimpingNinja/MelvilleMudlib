@@ -1,0 +1,193 @@
+This document describes all the functions defined in /system/player.c. It
+does not describe the functions inherited into that object, except for one
+function inherited from /system/player/edit.c. Some of the other inherited 
+functions are described in the documents on object functions and container
+functions.
+Note that the Melville lib does not have a monster.c object, which means
+that it does not need a living.c object either since all living functions
+can go into player.c. If you choose to create a monster.c, you will probably
+want to create a living.c and inherit it in both player.c and monster.c.
+Many of the functions described here would go in living.c in that case.
+
+void set_user(object newuser) ;
+set_user() is called to set the pointer to the user object associated with
+this player body. It may be called only by the driver object, which calls
+it when a new body is cloned.
+
+object query_user() ;
+query_user() returns the user object. Anyone can call this if they need to.
+
+int prevent_get() ;
+prevent_get() returns 1 so you can't use the get command to pick this
+object up. There are several other objects that also define this.
+
+void set_wizard (int val) ;
+set_wizard() sets the value of the wizard variable in player.c. Only
+the associated user object may call this function. A value of 1 makes
+the player a wizard: a value of 0 makes him a player. Admins are a
+subset of wizards and the value of wizard is 1 for them.
+
+int query_wizard() ;
+Returns 1 if the player is a wizard, 0 if not.
+
+int query_living() ;
+query_living() marks the player.c object as a living object to which says 
+should be sent. It returns 1 unless the player is linkdead, in which case
+it returns 0.
+
+void enter_world() ;
+enter_world() is called when the player has entered a valid password and
+is ready to move to the start room. Only the associated user object can
+call it. It sets the name, cap_name, and id, and moves the user to the
+start room.
+
+varargs int move (mixed dest, string direction, int silent) ;
+move() moves the player from one location to another. It overrides the
+function move() in object.c. It prints the player's movement message
+and forces him to look at his new surroundings. The optional argument
+direction is used to print the message: if passed, it will tell his
+old room which direction he left. The optional argument silent can be
+used to supress printing of the movement messages.
+
+void set_brief (int val) ;
+set_brief() changes the value of the player's brief variable. If the
+value is 1, the player sees long descriptions when he enters rooms: if
+0, he sees short descriptions.
+
+int query_brief() ;
+query_brief() returns the value of the player's brief variable.
+
+void command (string str) ;
+command() is called by the associated user object whenever the player
+sends a string that is not either part of an input_to() call or an
+editor command. The function checks for an appropriate command bin
+to call depending on the player's privileges. If it does not find one,
+or the call returns 0, it then checks for local objects with add_actions
+on the appropriate verb. If it doesn't find one, it tries the soul
+daemon. If that returns 0, it prints the fail messsage if one has been
+set, and prints "What?" if not.
+It also does some rudimentary alias processing, and performs !! and
+^foo^bar type replacements. A full history queue and better alias
+handling could be added here.
+If you want to add more sophisticated language parsing, command() is the
+place to do it.
+At the moment command() can be called only by the associated user object.
+This makes it impossible to make a force command or similar hook. If you
+want to add such a command, you will need to give it permissions to call
+this function also.
+
+void edit_command (string str) ;
+edit_command() is similar to command() above but much simpler. It is
+called by the user object whenever the user is in the editor and sends
+a command. This function passes that command along to the editor() kfun.
+It also detects whether the player has quit the editor and, if so, puts
+him back into command-giving mode.
+
+varargs int edit_file (string filenm) ;
+edit_file() allows the player to start up an editor session. In the
+Melville mudlib a wizard's editor instance is associated with his
+body object, which is why this function must be defined here. Right
+now only the ed command can call it, for security. If you want to give
+players another route to enter the editor you will need to permit the
+calls.
+Note that this puts the player into the full editor, with file reading
+and writing capabilities. This function should not be called in a player
+at any time: it has security to prevent that. Use the function begin_edit(),
+defined in /system/player/edit.c, to put non-wizards into a simple input_to
+based editor that does not allow them any powers they should not have.
+
+void receive_message (string str) {
+This function occasionally catches output from the driver, usually
+when some kind of error message needs to be printed. You should not
+call it yourself: use catch_tell() instead.
+
+void quit() ;
+quit() is called from the quit command when the player quits. It calls the
+quit() function in user.c to destruct the user, then destructs the player
+as well. It can also be called by the shutdown daemon, or by a user object
+which is still in login. The latter is necessary to permit a player to
+reconnect to a linkdead body object. 
+
+int query_vision() ;
+query_vision() should return 1 if the player can see in his current
+environment, or 0 if he cannot. At the moment there is no light handling
+code and it always returns 1. If you wanted to add light, this would be
+the correct place to do so.
+
+string query_short() ;
+query_short() overrides the function defined in object.c. It returns
+the player's capitalized name, plus a note if the player is linkdead.
+
+string query_long() ;
+query_long() overrides the function defined in object.c also. It returns
+a description of the player, which at the moment is limited to his name,
+an editable description string, and a list of his inventory.
+
+void set_name (string str) ;
+This can only be called by the associated user. It sets the name and
+the cap_name of this player.
+
+string query_name() ;
+query_name() returns the player's name.
+
+string query_cap_name() ;
+query_cap_name() returns the player's name, capitalized. Storing both
+and having two accessor functions saves many calls to capitalize()
+and thus much CPU.
+
+int set_cwd (string str) ;
+set_cwd() changes the player's current working directory. The cwd is used
+by many commands to translate a short file name into a full one. This
+function can be called only by the cd command.
+
+string query_cwd() ;
+query_cwd() returns the user's cwd. Anyone can call this.
+
+void catch_tell (string str) ;
+catch_tell() passes a message to the user object by calling catch_tell()
+in user.c. Such messages are sent back to the player's remote terminal.
+It's mostly here to avoid a lot of calls to query_user(), but it's a very
+handy thing to have since it's usually easy to get a list of all players
+in a room using query_inventory() but hard to get a list of their user
+objects. It is also possible to build in some kind of snoop or cybermation
+system here.
+
+varargs void more_file (mixed arg) ;
+more_file() puts the player into a very limited file moring system. It
+allows the user to advance to the next screen of text and to quit, but
+not much more. 
+
+void continue_more (string str) ;
+Used by more_file() to handle the input from the user via input_to().
+(Needs to be called by user.c only.)
+
+void more_strings (string *file) ;
+This lets you enter the morer by passing an array of strings to be mored
+rather than a disk file. Useful for the mailer, the board, and other
+cases where the thing to be mored is not actually in its own disk file.
+
+string query_subjective() ;
+query_subjective() returns "he" if the player is male, "she" if female,
+and "it" otherwise. Used for printing messages correctly.
+
+string query_objective() {
+query_objective() returns "him" if the player is male, "her" if female,
+and "it" otherwise.
+
+string query_possessive() {
+query_possessive() returns "his" if the player is male, "hers" if female,
+and "its" otherwise.
+
+void set_describe (string str) ;
+set_describe() can only be called from the describe command. It allows
+the user to change his description string which is printed whenever
+another user looks at him.
+
+string query_describe() ;
+This returns the description string of the player.
+
+void set_fail_msg (string str) ;
+This sets the failure message which should be printed when a player's
+input string isn't recognized as a valid command. It's usually invoked
+by the fail_msg() autofun although you can call it directly if you
+prefer that.

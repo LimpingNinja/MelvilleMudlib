@@ -1,0 +1,60 @@
+There are three important objects in the mailing system: the mailer
+object itself, the mail daemon, and the mail command.
+
+Mail messages are stored in a mapping with six fields: subject, to,
+from, text, unread, and deleted. Subject is the subject of the message.
+To is the list of users to whom the mail was sent. From is the user
+who send the message. These three fields are all strings. Text is a
+single string which is the text of the message. It contains line feeds
+if the mail message has more than one line. The unread and deleted
+fields are integers which are 1 if the mail is unread or has been
+deleted by the user, respectively, and 0 if not. Each user has a mail
+spool which is an array of these mappings. When the user exits mail,
+or when a new mail message is added to his mail spool, this array is
+saved to disk in /data/mail with the name of the user as the file name.
+
+The mailer is the most complicated of the three. When the user enters
+mail, a clone of this object is loaded. It will have object privileges
+and its creator will be the name of the player who entered the mail
+command. First create() is called, then the mail command call the
+initialize() function. If the player typed "mail foo" then initialize()
+will begin sending a mail message to foo. Otherwise it will input_to()
+the function get_mail_command() to enter the main loop of the mailer.
+The users mail spool is restored by create() if it exists, otherwise
+a blank mail structure is initialized.
+The function get_mail_command() takes a string of input from the user and
+tries to parse it as a mailer command. A blank string will display the
+current message. A number will display that number message. After that,
+the code checks the first character of the string against various commands.
+"m" sends a new mail. "r" replies to a message. "d" deletes and "u"
+undeletes mail. "q" quits from the mailer. "h" prints the user's
+mail headers. "?" prints a couple of lines of help. There is one
+function (or more in some cases) to handle these commands.
+Reading mail makes a call to the more_strings() function in player.c
+to more the file. Sending mail calls begin_edit() in the player.c to
+edit the message and calls the mailer daemon (see below) to send the
+mail. At the end of each function (except quit) the mail prompt is
+written and input is directed to get_mail_command() to handle the
+next command. When the user quits, his spool is saved and the mailer
+object destructs itself. (Note that the mailer object is not moved
+into the player's inventory, unlike the traditional method.)
+
+The mail daemon defines two functions. One, add_mail_to_spool(), takes
+the name of a user and a mail message. It restores the user's spool,
+adds the new message, saves the spool, erases its internal memory, and
+returns. This is necessary because the mailer only has permissions to
+read and save the spool of the user that loaded it: the daemon has the
+power to write to any mail spool, but it can only be used to add new
+messages, not delete messages or change their contents.
+The second function, count_unread_mail(), restores a mail spool for a
+named user, counts the number of unread messages in the spool, erases
+its memory, and returns the number of unread messages. It's used at
+login time to tell the user if he has new mail. It could also be added
+to the finger command but that has not been implemented.
+
+The mailer command is in /cmds/player, which means that players can
+read mail from anywhere in the mud. You may want to move this command
+to /cmds/wizard and add a post office object which does what the
+command does, but only when a player is in the post office. All it
+does is clone a mailer object for the player and call the initialize
+function in it.

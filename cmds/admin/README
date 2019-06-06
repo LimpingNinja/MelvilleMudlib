@@ -1,0 +1,5 @@
+This directory stores commands that can be used only by admins. Note that,
+while the command hook will not let a non-admin call into these objects,
+a wizard can write code which uses call_other() to call into them. So
+each function in the object must either be static, or check to make sure
+that the calling object has admin privileges.

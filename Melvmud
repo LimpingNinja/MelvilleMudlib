@@ -1,0 +1,34 @@
+/* base directory (MUST be absolute) */
+directory       = "/Users/LimpingNinja/Projects/MUD/melville/lib/";
+
+users           = 2;                    /* max # of users */
+editors         = 10;                   /* max # of editor sessions */
+telnet_port     = 1863;                 /* TCP/IP port number */
+binary_port     = 1862;                 /* And why not? */
+
+
+ed_tmpfile      = "../tmp/ed";          /* proto editor tmpfile */
+swap_file       = "../tmp/swap";        /* swap file */
+swap_size       = 4096;                 /* # sectors in swap file */
+cache_size      = 100;                  /* # sectors in swap cache */
+sector_size     = 512;                  /* swap sector size */
+swap_fragment   = 32;                   /* fragment to swap out */
+static_chunk    = 15360;                /* static memory chunk */
+dynamic_chunk   = 261120;               /* dynamic memory chunk */
+dump_file       = "../tmp/dump";        /* state dump file */
+dump_interval   = 3600;
+
+typechecking    = 2;                    /* global typechecking */
+include_file    = "/include/std.h";     /* standard include file */
+include_dirs    = ({ "/include" });     /* directories to search */
+
+auto_object     = "/system/auto";       /* auto inherited object */
+driver_object   = "/system/driver";     /* driver object */
+create          = "init_object";        /* name of create function */
+
+array_size      = 4000;                 /* max array size */
+objects         = 1000;                 /* max # of objects */
+call_outs       = 1200;                 /* max # of call_outs */
+
+/* Example of how to load a module, the extension regexp */
+/* modules              = ({ "kfun_regexp" }); */

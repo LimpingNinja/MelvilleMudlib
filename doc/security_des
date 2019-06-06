@@ -1,0 +1,87 @@
+Why is the Melville security system so primitive? That's probably the
+most common question I get about Melville, since it resembles the
+old LP security system.
+
+The issues surrounding MudOS security as it existed in 1994 had to
+do with UIDs. It was clear that there was a substantial problem,
+which was that it was too easy to trick an object with a powerful
+UID into performing a secure operation that shouldn't be permitted,
+and in that way break into the mud security system. The dominant
+approach to solving that problem was to use a stack-based method
+of security, essentially checking before any secured operation
+that every object in the call trace, not just the previous one,
+had rights to carry out the operation.
+
+On the one hand, that works, no problem, and stack based security is,
+I think, the most secure thing you can get. On the other hand, it's
+complicated, and complex security systems worked against one of my
+design goals for Melville. Also, the problems with UIDs under MudOS
+(really with the mudlibs available for it) could be solved in what
+was, to me, an acceptable way without going to stacks. The basic
+problem was that, while a UID is supposed to identify a group of
+objects with similar permissions, in fact objects weren't grouped
+that way. There were two main flaws. First, the body of a wizard,
+particularly an admin, got the same UID as any object loaded from
+that wizard's directory. That meant that anyone could clone an
+object from an admin's directory and have the same permissions
+as the admin. That led to a number of interesting security problems,
+especially if admins didn't understand the implications of (say)
+having a free call_other() in an object in their directory. Second,
+too many things had Root UID; any file-writing command did (and in
+some mudlibs all commands did), all daemons did, and all of these
+objects had the same permissions as the master object did. Admins
+who didn't understand how UIDs were set (many of them) often gave
+out write access to directories which loaded with Root UID without
+realizing that they were giving away the keys to the store.
+
+From this I drew two conclusions. First, reorganizing the objects
+into better groups would close down a lot of the problems. Second,
+it was important to keep the system fairly simple and to try to
+make it hard for novice admins to accidentally shoot themselves
+in the foot. Admin mistakes were (and I think still are) a far
+bigger threat to security than skilled crackers are; for that
+reason I'm willing to give up the extra security that stack based
+systems give you in order to keep things at the level where an
+admin with no background in computer science could grasp them
+fairly quickly, and keep them in line with what most admins
+raised under old-style LP security would expect to see. I've
+traded some safety (I think a very small amount) for some ease of
+use (I think a very large amount) and to me it seems like a good
+trade to make (although it appears that a lot of people who worked
+on stack based systems don't think so). But I think it's a difference
+in priorities rather than one of opinions about what is or is not
+secure.
+
+Accordingly, I stuck with what is, in essence, a UID based system
+(although I call it by a natural name, privileges, rather than
+by a somewhat opaque UNIX-derived term) and reorganized the groupings
+to be easier to work with. First, "driver" is one privilege that
+nothing but the driver can have. There is no way for any other
+object to get this equivalent of Root privilege (unless you hack
+set_privileges, which of course you can if you want to). Second,
+user objects have privileges tags which only user objects can
+have, and they have three different ones - "player" for players,
+"wizard" for wizards, and "admin" for admin. No other object can
+ever have one of those three privileges tags. Most things that,
+under old-style LP, could be done with a UID of an admin's name
+are now restricted to the "admin" tag. Of course, you may need
+to know which admin (or which wizard, or which player) which is
+why the creator variable exists and is set to the name of the
+relevant user. So you can still track things by individuals if
+you need to (although Melville generally doesn't except for
+some logging features). Commands get "command" and system objects
+get "system", and everything else gets "object" which is basically
+permissionless. Of course, you can edit set_privileges to change
+that if you want, although I recommend that you tread very
+carefully if you make changes there.
+
+Those are the reasons for the security system design; it reflects
+a belief that making the system super-secure against expert
+crackers (who are rare) is not as important as making the system
+simple and easy to use for everyone, especially people who might
+be new to core mudlib coding. On the other hand, one advantage
+of the current system is that it should be easy to rip out and
+replace; if you feel the need for stack-based security, and have
+the ability to code it, it shouldn't be terribly, terribly hard to
+use DGD's call_trace() kfun to implement it, and I commend you
+to the task, even though I have decided not to undertake it.

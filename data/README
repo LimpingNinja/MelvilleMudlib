@@ -1,0 +1,4 @@
+This directory holds various data files used by the mudlib. User data is
+in /data/user, player data in /data/player, mail spools in /data/mail, and
+other miscellaneous data (notably the welcome messages and the soul commands)
+are in /data/system.

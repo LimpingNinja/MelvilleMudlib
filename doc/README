@@ -1,0 +1,6 @@
+All the documentation that comes with the mudlib goes here (except for the
+comments in the various files, naturally). You may also want to simlink
+your kfun docs that came with the driver to this directory.
+If there's any files in here you haven't read, you should do so: they're
+very informative and there aren't so many that you can't get through them
+all fairly quickly.

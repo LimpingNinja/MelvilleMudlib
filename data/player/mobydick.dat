@@ -1,0 +1,8 @@
+gender "male"
+name "mobydick"
+cap_name "Mobydick"
+describe "Mobydick is a really, really, really big whale."
+wizard 1
+cwd "log/"
+cwf "/License"
+quit_location "/world/start"

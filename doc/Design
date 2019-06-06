@@ -1,0 +1,100 @@
+This document discusses the design of the mudlib and the reasons why
+things are coded the way they are. (Yeah, there are reasons for most
+of the design decisions :) It also indicates some alternative approaches
+you could take if you wanted to rip out what's in place.
+
+The first design question was the scope of the lib. I was very impressed
+with the DGD driver but quite disappointed with the 2.4.5 mudlib,
+which is some years behind the times in mudlib design. (Note: I wrote
+that for the first time in 1994; it made more sense then). On the other
+hand, if you just wanted a quickly installed, all features present
+mudlib, and didn't care about design issues, then the 2.4.5 lib is
+fine. And it's not all bad - I have retained a number of its features
+in Melville, either because I liked their simplicity, or because
+there were several different ways to update them and I couldn't
+choose one particular one.
+The second observation, which I made at TMI over the course of time, is
+that any two people have different tastes in how to code many mudlib
+features like combat, magic, monsters, and so forth. On the other
+hand, not that many people care how low level things like object
+variables, the mechanics of logging in and out, player record
+keeping, and security (so long as it works) are done.
+
+Given these two facts, I decided to produce a lib which would be
+fairly up to date in most of the low-level necessities but would
+do very little higher level design. Things like combat, delegation
+of powers among wizards, player promotion, and quests are not coded
+at all. The goal of the mudlib design was to produce the minimum
+amount necessary to let a group of wizards log in, communicate with
+one another, and began adding higher level design and the game
+world themselves. Or, if they wanted to, they could rip apart
+the existing mudlib code (which is all fairly simple to understand
+and alter if you want to) and produce a mudlib that's different
+from what already exists.
+
+It was clear that a bulletin board and a mailer would be necessary. So
+would some kind of file protection that would let wizards coding areas
+read, but not write, the system files. Other things were added only if
+they were necessary to provide the above. For example, a bulletin
+board needs a room to put it in; so a room.c was necessary. In order
+to communicate with other wizards you need a say and tell command.
+In order to use tell you need to know who's logged in, so a people
+command was added. To allow admins and wizards to work together
+you need a file system which allows editing of mudlib files by
+the one group but not the other. 
+So the lib was built up aiming towards the board, the mailer, and the
+communucations commands as the goal. I started by taking the driver
+object and a small chunk of the auto object from the 2.4.5 simul. I
+then hacked on user until I could get a verified password. Then I
+switched over to player, which required object, container, and room
+to be built. Once player was working, I had to add security to tell
+one player from another. Then I started working on player commands.
+When I added the file handling commands, I needed security for them
+which was added: later I needed it for editing and that was added.
+Finally I got to work on the bboard and mailer, which required the
+line-based editor and the add_command() structure. Things incidental
+to these, like the people command and the soul daemon, got added as
+small side projects from the main tasks.
+In version 0.9, I made two main additions. The first was a channel
+daemon, which now seems to be a necessity (rather than a luxury as
+I viewed it in 1994). I decided to have each channel use a command
+file, rather than have a dynamic channel allocation mechanism,
+because both the channel daemon and command processing can be a
+whole lot simpler that way. It does make it relatively cumbersome
+to put security on channel access and to add new channels, which
+is the downside to the design tradeoff. The second is a force
+command, which is there mostly to demonstrate the use of the
+new this_player() handling functions. See the document on
+this_player() for more information.
+
+My main goal in designing code was to keep things simple. Since I'm
+going to be giving this code out to lots of people (I hope!) I wanted
+to make sure all the algorithms were fairly easy to understand. They
+are also fairly easy to change, or to rip out completely if you want
+to do something differently from the way I did it. Several aspects of
+the lib, such as wizard grouping, security, and command handling, could
+have been done in more flexible ways, but only at the cost of being
+harder to understand and harder to alter. I chose the simplest method
+possible that would satisfy my design goals.
+The second goal was to keep things reasonably efficient. On the one hand,
+I tried not to add on a lot of CPU-using frills that you could add on
+for yourself if you wanted them. On the other hand, where I could add
+on useful features or hooks without using up too much CPU, I did that.
+The lib strikes a balance between being powerful and being small and
+efficient, probably towards the "small and efficient" end of the scale.
+This makes it easy for you to add in those features you want without
+having to wade through a lot that you don't. Keeping the length down
+also makes it easier for a new admin to get up to speed on the entire
+lib, which is very hard to do on many mudlibs which have more features
+than this one does.
+The third goal was to keep the system fairly extendable. This works in
+two ways. First, most of the algorithms used are commented in the code,
+and many of them are described in /doc as well. It should not be too
+hard for someone who has a passable knowledge of LPC to figure out how
+to extend the system to do more than it currently does. The second goal
+was to keep things fairly separated, so that if you want to change (say)
+the security, you can leave the command parsing, the movement scheme,
+the mailer, and so forth more or less intact. Obviously to keep things
+totally separated is impossible: but I kept it as streamlined as I could
+to make the lib easy to rip apart and rework if that's your cup of tea
+(which it seems to be for most people I know ;)

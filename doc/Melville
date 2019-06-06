@@ -1,0 +1,72 @@
+The Melville mudlib is a native DGD mudlib, designed from the start to be
+used with the DGD driver and to take advantage of the features of that
+driver. The purpose of the mudlib is to give you enough code to organize
+a group of wizards and admins to start coding any kind of multiuser
+environment you might wish to have; a game, a meeting facility, a
+text-based virtual reality, or any other purpose you may have in mind.
+The code is designed to be simple enough to be easily understood, and
+easy to change if you want to build something more flexible, more powerful,
+or just different. At the same time it offers enough features, including
+a working security system, an admin/wizard/player hierarchy of users,
+functional rooms, objects, and other inheritables, and mail and bulletin
+boards for communication, to let you being building your mudlib and
+a game world on top of it if you wanted to do so.
+
+There are a number of important user defines stored in include files
+in the /include directory. The most important is config.h, which defines
+the file names of all important objects in the mudlib. Another is options.h
+which lists various user-definiable options that you may with to change.
+Another is admin.h, which contains an array of the names of the admin
+characters. This directory also includes std.h, which is not used, and
+limit.h and status.h which are provided by the driver at start time.
+
+There are four main system objects in the game. All four of them are
+found in the directory /system in the mudlib. First is the auto object,
+which is inherited into all other objects. This object overrides sensitive
+kfuns, provides object security, and provides various functions like
+input_to(), present(), and other things useful in all objects. The
+auto object functions are described in /doc/functions/autofuns.
+Second is the driver object. All calls from the driver go into this
+object, except those which go directly into a user object. It handles
+editing permissions, opens and closes user connections, and various
+other driver-interface tasks. See /doc/functions/driverfuns for a list
+of the functions in this object and their descriptions.
+Third is the user object. The user object holds the connection between
+the user's socket and the mud, and stores data about the Real Person on
+the other end like name, email address, and wizard status. Every user
+object is associated with the fourth object, the player object, which
+is the body of the player in the MUD world. The player object contains
+the short and long description of the player, stores his character
+related data like gender and inventory, and does command parsing for
+commands the user sends. In addition, when a wizard starts an editor
+session, the player object is the object which holds the editor instance.
+See /doc/functions/userfuns and /doc/functions/playerfuns for the various
+functions defined in these objects.
+
+There are four important inheritable objects which can be used to build
+the mud world. These objects are in the directory /include in the mudlib.
+Of these, the most basic is object.c. It defines short and long description
+handling functions, id functions, and movement and environment functions.
+Any object which is intended to have a physical presence in the mud world
+should inherit this file (or one of the other files, all of which inherit
+tobject). The functions defined in object.c are described in the file
+/doc/functions/objectfuns.
+The next most complex is container.c, which defines inventory handling
+functions. Any object which will contain other objects (including rooms
+and players) inherits container.c. /doc/functions/contfuns describes
+the functions of this object.
+The next object in the chain is room.c, which inherits container.c (and
+thus object.c indirectly). It defines exit handling commands, and has
+a query_long() function that handles describing room contents and the
+brief mode when players move. Its functions are described in the file
+/doc/functions/roomfuns.
+The last inheritable object is board.c, which provides a basic bulletin
+board object for posting and reading notes.
+
+There is a small mud world consisting of two rooms, which are defined
+in /world, a board also in /world, and two objects in /obj.
+
+There are 21 player commands and 29 wizard commands (six of which are
+admin-only commands) available in the mudlib. These commands are
+listed and briefly described in the two files /doc/wiz_cmds and
+/doc/player_cmds.

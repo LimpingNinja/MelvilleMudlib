@@ -1,0 +1,40 @@
+This document describes the functions defined in /inherit/container.c.
+Note that container.c inherits /inherit/object.c and the functions
+defined there, described in objectfuns, are also defined in containers.
+The exact syntax of the declaration of each function is given, followed
+by a brief description of the function.
+
+int receive_object (object ob) ;
+receive_object() is called whenever an object tries to move into this
+container. The function should return 1 if the move succeeds and 0 if
+it fails. If the move suceeds, the object is added to the inventory
+array of the container.
+At the moment, it always returns 1. You may need to change this to
+install an encumbrace system of some kind. You may also want to override
+it in certain containers to prevent them from receiving some objects.
+
+int release_object (object ob) ;
+release_object() is called whenever an object tries to depart from this
+container. It should return 1 if the departure suceeds and 0 if it fails
+(in which case the attemped move is cancelled.) Again, there is no actual
+check done, except to see that the passed object is actually present in
+this object. You may want to alter this for some kind of encumbrance
+system or override it to prevent certain objects from being moved from
+this container.
+
+object *query_inventory() ;
+query_inventory() returns a copy of the inventory of this object.
+
+object present (object container, string id) ;
+The present() function takes a container that may contain objects
+as the first argument and a string as the second argument. If there
+is any object in the inventory of the container that has the string
+as part of its id array, then that object will be returned. If there
+is no such object, then 0 will be returned. If there is more than
+one object with that id, then the one that appears first in the
+inventory array will be returned.
+If the string argument is "me", the body of the current user is
+returned. If the string argument is "here", the body's environment
+will be returned. This way the various commands do not need to
+trap for those arguments before invoking present().
+

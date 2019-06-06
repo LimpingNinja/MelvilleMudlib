@@ -1,0 +1,5 @@
+/cmds holds commands for users. It has three subdirectories, player for
+player commands, wizard for wizard commands, and admin for admin commands.
+All of these paths are hardcoded in the command() function, so don't change
+them lightly. You can move a command from one directory to another if you
+want to change its security level.

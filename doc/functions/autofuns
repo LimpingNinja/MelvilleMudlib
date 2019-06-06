@@ -1,0 +1,171 @@
+This document describes each of the functions defined in /system/auto.c.
+auto.c also inherits two files, /system/auto/overrides.c which protects
+various kfuns for security, and /system/auto/security.c which contains
+the functions described in /doc/security.
+The exact syntax of each function is given, followed by a brief
+description of what the function does.
+
+void create() ;
+The create() function is called in all objects when loaded. The auto.c
+defines an empty create() function so that there won't be problems with
+create() being undefined. You can override create() to do other things
+like set a short or a long description, load an object into the
+inventory of the given object, and so forth.
+
+static nomask void init_object() ;
+The init_object() function is called by the driver whenever an object
+is loaded: this is defined in the mudlib config file. It does two things.
+First, it calls set_privileges() and set_creator() for the security
+routines. Second, it calls create().
+
+varargs static nomask void input_to (string func,int flag) ;
+The input_to() function is used to redirect the next string sent by
+the user to the function func in the given object instead of to the
+command parser. If you call input_to, nothing will happen until the next
+time the user sends a message. Then, func() will be called in the same
+object, and the string the user sent will be passed to fund() as a string
+argument. You can use sscanf() to convert it to an integer if you need
+to. input_to() is used to handle things like asking the player for his
+password, his email address, and so on.
+If you pass the optional flag argument, then the output he sends will
+_not_ be echoed back to his screen. This is useful for passwords and
+not for much else.
+input_to works by setting a flag in the user object which tells the
+receive_message() function to call func instead of command(). See
+/system/user.c for details.
+
+static nomask string capitalize(string str) ;
+Returns the string, but with the first letter capitalized.
+
+static nomask string lowercase(string str) ;
+Returns the string, but with any capital letter anywhere in the string
+changed to lowercase.
+
+static nomask int file_exists (string str) ;
+Returns 1 if the named file exists, returns -1 if a directory with
+that name exists, and returns 0 if there is neither a file nor a
+directory with that name. str must be the full path of the file in
+question.
+
+static nomask string base_name() ;
+This returns the name of the file from which the object was loaded.
+Eg, if you call base_name() in /system/user#12, "/system/user" will be
+returned. If you call base_name() in /world/start (ie, an object which
+is not a clone), /world/start will be returned.
+Note that you must do foo->base_name(), not base_name(foo).
+
+static nomask int clone_num() ;
+This one returns the clone number of the object. Eg, if you call
+clone_num in /system/user#12, 12 will be returned. If you call it in
+an object which is not a clone, 0 will be returned.
+
+static nomask void write (string str) ;
+Sends a message to this_player()'s screen. It works by calling catch_tell()
+in player.c. If this_player() is not defined, it will call catch_tell() in
+this_user(), and if this_user() isn't defined either, then it calls it
+in this_object(). This means that during a call_out (when this_user() will
+be zero) write() should only be used from within user.c or player.c
+unless you define a catch_tell() in the given object to send the messages
+to the proper location.
+
+static nomask varargs void say (string str, object *excluded) ;
+Sends a message to all players in the same room as this_user()'s body.
+This_user() will be excluded. You can also pass the optional second
+argument which is a list of other objects to be excluded from receiving
+the message. It will also use this_object() if this_user() is not defined;
+it should be used only from player.c if this_user() is zero.
+
+static nomask int cat (string file) ;
+cat() prints the contents of a file to this_user()'s screen. It will
+not print more than MAX_CAT_LINES lines, defined in /system/auto.c.
+
+static nomask int member_array(mixed elt, mixed *arr) ;
+member_array() returns -1 if elt is not an element of the array arr.
+It returns the number of the element which is equal to elt otherwise.
+If there is more than one element with value elt, the first will be
+returned. Eg, if arr[2]="z" and arr[5]="z", then member_array("z",arr)
+will return 2, not 5.
+
+static nomask object get_object (string file) ;
+This finds the the object named by the argument, compiling it if
+necessary. It's a useful way to make sure an object is loaded;
+nothing happens if you call get_object() in a loaded object and
+don't use the returned value.
+
+static nomask string article (string str) ;
+article() will return "a" if the passed string begins with a consonant
+and "an" if it begins with a vowel. Used to properly print messages
+containing "a bow" and "an arrow" when the message printed contains
+a string argument whose first letter may not be known a priori.
+
+int destruct() ;
+destruct() will invoke the destruct_object() kfun on the given object.
+You may use call_other to destroy an object via this function: this is
+necessary because destruct_object() is overriden so that it can be
+used only from within the same object.
+You may wish to override destruct() in important objects (like users
+and so forth) to prevent them from being unexpectedly destroyed.
+
+static nomask string resolve_path (string path) ;
+resolve_path() takes a string arg, which is taken to be a file path,
+and appropriately eliminates any ! or . or .. from within. This is
+used  for things that want to take a file path argument, but don't 
+want to be tricked by things like:
+/users/mobydick/../ahab/my_nasty_file.c
+
+static nomask int absolute_path (string path) ;
+absolute_path() returns 1 if the string argument is an absolute path;
+that is, if it begins with / or ~. Generally used to determine whether
+or not the cwd should be prepended to a string prior to a file operation.
+
+static nomask int log_file (string file, string str) ;
+log_file() is used by the user object to write files to /log, which
+the user object cannot otherwise write to (unless the user happens
+to be an admin). This is necessary for maintaining the usage log and
+the creation log. This should probably be made more generally useful
+in the future, but it is necessary that it be secure against people
+using it to corrupt these logs.
+
+static nomask varargs string pad (string str, int size, int justify) ;
+pad() takes a string arg and an int arg, and pads the string with
+spaces until its length is equal to the integer arg. If justify is
+passed and is 1, then the spaces will be added to the front of the
+string: otherwise, they will be added to the end. This is useful
+for formatting output in lists. It'd be nice to have a real
+sprintf() but Dworkin was not obliging, and neither am I :)
+
+static nomask int copy_file (string oldfile, string newfile) ;
+copy_file() copies an old file to a new location without removing
+the old copy. It will return an error if the file is more than
+MAX_ARRAY_SIZE lines. It will not replace an existing file for
+safety reasons. It returns 1 if the copy succeeded and 0 if not.
+
+static nomask string previous_function() ;
+The previous_function() function returns the name of the function
+in the previous object which called the current function. It is a
+front-end for the call_trace() kfun: see that document for more
+details.
+
+static nomask object this_player() ;
+Returns the current player body. It will always be the body of
+the user who issued the command unless a force has been done.
+The pointer to this object is kept in /system/users_d; see that
+file for more details.
+
+static nomask void fail_msg (string str) ;
+This function calls the current player object to set the message that
+will be printed if an input string isn't recognized as a command. Lets
+you avoid getting the "What?" message all the time.
+
+static nomask set_heart_beat (int time) ;
+This function is called to start and stop the heart beat of an object.
+If you set it to a positive integer N, then the function heart_beat will
+be called in the object every N seconds until you call set_heart_beat
+with a different time value. Setting the time to 0 turns off the heart
+beat.
+
+nomask do_heart_beat() ;
+This is call_out'd from set_heart_beat() and from itself. It calls
+the heart_beat function, trapping for any error that occurs. If an
+error occurs, the heartbeat is shut off. If none occurs, the heart
+beat handle is updated and a new callout is made.

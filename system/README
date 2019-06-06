@@ -1,0 +1,6 @@
+The various critical system objects are stored here, including the driver
+object, the auto object, and the user and player objects. Also here are
+special daemon objects like the user daemon and the soul daemon. This
+directory has some special privileges and you should be very careful
+about making changes here, or adding new objects to this directory,
+especially if those objects read or write files.

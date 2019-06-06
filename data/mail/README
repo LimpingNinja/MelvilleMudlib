@@ -1,0 +1,2 @@
+Mail is stored in this directory. It's pretty rudimentary; the mailer
+object just saves data here in the save_object() format. But it works.

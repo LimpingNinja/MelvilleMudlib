@@ -1,0 +1,6 @@
+This directory contains the start room of the mud world and any other
+rooms or objects you might want to connect to the start room. If your
+mud world is small you can keep all the files in this directory. If it
+is larger, you may need to add a subdirectory structure, or link the
+rooms in this directory to rooms in wizards' directories, or create
+some yet fancier structure.

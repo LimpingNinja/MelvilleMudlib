@@ -1,0 +1,64 @@
+This document describes the functions defined in the standard object,
+/inherit/object.c, which should be inherited by any object which will
+interact with players in the course of the game.
+
+void set_short (string str) ;
+set_short() sets the short description of this object. It is used to
+describe the object in inventory listings, room contents, and printed
+messages.
+
+string query_short() ;
+query_short() returns the short description of this object.
+
+void set_long (string str) ;
+set_long() sets the long description of this object. It is used to
+describe the object when a user looks at it.
+
+string query_long() ;
+query_long() returns the long description of the object.
+
+object query_environment() ;
+query_environment() returns the object in which this object is currently
+located. Usually this will be a room, though it may be a player, some
+kind of bag, or it may be 0 if the object was cloned and has not yet
+been moved anywhere.
+
+void set_id (string *newid) ;
+set_id() sets the id of this object. The id is an array of strings which
+can be used to refer to this object in commands such as get, look, drop,
+and dest.
+
+string *query_id() ;
+query_id() returns the id array of this object.
+
+int id (string str) ;
+id() returns 1 if the string arg is a member of the id array of this
+object and 0 if not.
+
+int move (mixed dest) ;
+move() moves an object from its current environment to a new one. The
+argument may be either an object or a string which is the name of an
+object. First we check if the current environment is willing to allow
+the object to depart. Next we check to see if the new environment is
+willing to accept the object. If so, then we change the environment
+of this object and return. move() returns 1 if the move succeeded and
+0 if it did not. Note that some mudlibs use the opposite convention,
+so you may need to adjust to this method.
+
+void add_command (string word, string function) ;
+add_command() allows this_object to define a command which can be
+invoked by a user. It is analogous to add_action() on most LP muds.
+The first argument is a string which the user types to invoke the
+command: the second argument is the name of the function in this object
+to be called when the command is invoked. The string the user types will
+be separated by spaces and the first word will be compared against the
+word string. Any other words the user typed will be passed as an argument
+to the function. There is no support (yet) for partial match.
+
+varargs int perform_action (string verb, string arg) {
+perform_action() attempts to execute a command invoked with the first 
+argument, passing the second argument to the relevant function. It is
+called from command() in player.c whenever the user sends a string which
+cannot be matched to a bin command or a previous object commands. It
+returns 0 if there is no such function in the object, and returns whatever
+the function returns if there is one.

@@ -1,0 +1,101 @@
+This document lists the wizard and admin commands available and briefly
+describes each one. Documentation on the command handling system is in the 
+file /doc/cmd_handling. Documentation on the player commands is in
+/doc/player_cmds. In general, any file handling command will prepend
+the wizard's current working directory to any argument unless that
+argument is a full path (ie, begins with "/" or "~").
+
+cd, clone, cp, dest, disconnect, ed, emote, filenames, force, goto,
+ls, makewiz, mkdir, more, mv, nuke, people, priv, pwd, recreate, rm,
+rmdir, shutdown, status, tail, task, update, users, wiz
+
+The cd command allows the wizard to change his current working directory.
+
+The clone command allows a wizard to make a clone of a file whose name
+is passed as argument. The maser copy of the object will be loaded if
+it is not already. The clone will be moved to the wizard if possible
+and to his environment if not.
+
+The cp command copies a file from one place to another. The original
+copy is not affected.
+
+The dest command destructs a named object in the inventory or environment
+of the wizard.
+
+The disconnect command disconnects the named user. Admins only.
+
+The ed command allows the wizard to enter the editor, supplying the name
+of the file he wishes to edit.
+
+The emote command lets a wizard print any string he likes, with the
+string "-> " and his name prepended. Lets the wizard express himself
+more freely than the soul commands permit.
+
+The filenames command shows the object names (file and clone number) of
+all objects in the wizard's environment.
+
+The force command allows an admin (only) to cause a named player
+to execute a specified command.
+
+The goto command allows a wizard to move to a room whose filename is
+given as argument.
+
+The ls command shows the contents of a named directory. If no name is
+given, the current working directory is listed.
+
+The makewiz command makes a player character into a wizard. Only admins
+can use this command.
+
+The mkdir command creates a new directory.
+
+The more command shows the text of a named file, one page at a time.
+
+The mv command moves a file to a new location. The original file is erased.
+
+The nuke command erases the player and user files and the mail spool of
+the named user. Wizards may be nuked but admins may not. Only admins may
+use this command.
+
+The people command shows a list of all logged in users, their privileges,
+idle times, current location, and ip address.
+
+The priv command shows the privileges and creator strings of a named
+object, which may be named by file name or by id if present in the
+wizard's environment or inventory.
+
+The pwd command prints the wizard's current working directory.
+
+The recreate command destructs the named object and reloads it.
+This differs from update in that the object's create() function
+will be called the next time it is accessed, which will not
+happen if the object is merely updated. This may matter if, for
+instance, the object needs to reload its data after being updated
+(for instance, if you have added an emote to the soul daemon).
+
+The rm command removes the named file. There is no way to undo this. It
+does not remove directories; the rmdir command does that.
+
+The rmdir command removes the named directory, which must be empty.
+
+The shutdown command forces all users to quit and kills the DGD process.
+Only admins may use this command.
+
+The status command shows various information about a named object, if
+an argument is given, or about the mud process if no argument is given.
+
+The tail command shows the last 20 lines of the named file.
+
+The task command allows a wizard to add an entry to the TASKS log of
+things that need to be done around the mud.
+
+The update command allows a wizard to load or reload an object into the
+game. Note that 1) when an existing object is recompiled, it is not
+destructed, and therefore, create() is not called in it; 2) updating
+an object which is inherited by another object can have unpredictable
+consequences. If you wish create() to be called in the object,
+then use the recreate command instead.
+
+The users command shows a list of all logged in users and the object
+names of their associated bodies, if any. Only admins may use this command.
+
+The wiz command sends a message to the wizard channel.

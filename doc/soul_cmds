@@ -1,0 +1,37 @@
+This file describes the soul command data file, its current entries, and
+the method for adding new commands to the soul daemon.
+The soul daemon is /system/soul_d.c. At create time it reads the possible
+soul commands from the file /data/system/soul.data. The currently accessible
+commands are:
+
+smile, bow, wave, frown, curtsey, scream, faint, groan, kick, ponder,
+meditate, cheer, nod, grin, shrug, giggle, sigh, boogie
+
+Each command takes up three lines in the data file. The first is the
+command word that the user types to invoke this soul command. The
+second is the message printed to the user. The third is the message
+printed to other users in the same room, except that $N will be replaced
+by the user's name. Any string the user types after the soul command
+will be appended to the messages. Thus, if the soul entry is:
+
+gag
+You gag on a spoon
+$N gags
+ 
+and the user types
+
+"gag joyfully"
+
+then the printed messages will be:
+
+"You gag on a spoon joyfully."
+"Mobydick gags joyfully."
+
+To add your own soul commands, just add the relevant three lines to
+the data file. Then -recreate- the soul daemon with the recreate
+command. Updating it alone won't add your new commands, because
+update (unlike on other LPs) only changes the code, but leaves
+the internal data unchanged. Recreate dests the object and reloads
+it, and then create() will be invoked to load the new data. (Or,
+if you haven't changed the code, just invoke create() in the
+soul daemon some other way without bothering to update it.)

@@ -1,0 +1,66 @@
+This document lists the player commands available and briefly describes
+each one. Documentation on the command handling system is in the file
+/doc/cmd_handling. Documentation on wizard commands is in /doc/wiz_cmds.
+
+Available commands are:
+brief, bug, date, describe, drop, finger, get, go, gossip, help,
+history, inventory, look, mail, quit, say, show, tell, tune, who
+
+The brief command toggles the players brief/verbose status. In brief
+mode, a player sees the short description of a room when he enters it:
+in verbose mode, he sees the long description.
+
+The bug command allows the player to report a bug in the mudlib to the
+BUGS log.
+
+The date command shows the current time and date in the host computer's
+time zone.
+
+The describe command lets a player enter a short description of himself
+which will be shown any time someone looks at him.
+
+The drop commands moves an object from the player's inventory to the
+inventory of his environment.
+
+The finger command shows information about the name, email address,
+and last login time of another user.
+
+The get command moves an object from the environment of the player into
+the player's inventory.
+
+The give command moves an object from one player to another.
+
+The go command lets a player move through an exit of the current room.
+The cardinal directions are aliased: "n" for "go north", "se" for
+"go southeast", and so forth.
+
+The gossip command sends a message to the gossip channel.
+
+The help command lets the player cat a named file in /doc/help.
+
+The history command shows the player's most recent commands, which
+can be re-issued with !23, !foo, and !!, and modified and re-issued
+with ^foo^bar constructs.
+
+The inventory command shows a list of all objects in the player's
+inventory. It is aliased to "i".
+
+The look command allows a player to look at another object. With no
+argument it allows the player to look a his current environment.
+
+The mail command lets a player enter the mailer to send and read mail.
+
+The quit command lets the player quit the game, ending his connection.
+
+The say command lets a player send a message to all the other players in
+the same room as himself.
+
+The show command shows who is tuned into a named channel.
+
+The tell command lets a player send a message to a single user in the
+mud regardless of location.
+
+The tune command lets a player tune a channel in or out.
+
+The who command shows a list of all players currently logged into the
+mud and their idle times.

@@ -1,0 +1,6 @@
+These files are included by auto.c (NOT inherited: you can't inherit into
+the auto object, since all objects inherit it.) overrides.c defines functions
+which override several kfuns to provide security and protect them against
+improper use. security.c defines various security-related functions that
+either control object privileges or use them to allow or deny access to
+the overridden kfuns.

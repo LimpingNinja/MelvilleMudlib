@@ -1,0 +1,30 @@
+Assorted things you should know that don't really fit in any other
+document.
+
+The large majority of commands rely on previous_object() to be the
+body of the user that issue the command. It is possible for any
+other object to call into a command. It should _not_ be possible
+for them to do any damage that way, since they cannot have wizard
+or admin privs (even if they come from an admins' dir), but you
+should be careful about making such calls. A few objects which do
+need some extra security also check the identity of this_user()
+to be extra sure.
+Of course, you could easily add:
+   if (previous_object()->base_name()!=PLAYER) return ;
+to any command files that had to know, for sure, that the call was
+coming from a player. But since this would require extra CPU I have
+not added it.
+There is now a force command in the mudlib which has permission to
+call command() in a player. Calls into command() are a potential
+security hole and you should be very, very careful about allowing
+other objects to do this. You should also be careful about allowing
+objects to alter this_player() as the force command does. If the
+pointer to this_player() gets screwed up you have a big security
+problem which will ruin your whole day.
+
+There is a basic heart beat system. There is one major function, which
+is set_heart_beat(). Setting the heart beat to zero turns it off; setting
+it to a positive integer N causes a repeated call_out to the function
+heart_beat(), which you define yourself, every N seconds, until you change
+N again (or shut off the heart beat). The code is defined in auto.c so
+all objects have this capacity.

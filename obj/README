@@ -1,0 +1,4 @@
+Various interesting objects which can be cloned are stored in here.
+Only things that are ready to be cloned by J. Random Wizard should
+really be kept here, since the whole point of having this directory
+is to mark its contents as ready to go.

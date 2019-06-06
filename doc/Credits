@@ -1,0 +1,82 @@
+Version 0.9.1 includes several fixes in security.c made in 
+response to feedback from Felix Croes, and a couple of bug fixes
+based on reports by Brandon Rush. It also includes one new command
+recreate, which destructs an object then updates its code. This is
+useful for getting create() invoked again if you need that, for
+instance, if you have changed its internal data. Michael Vickery
+pointed out the need for this in regards to the soul daemon.
+
+Earlier credits:
+
+Version 0.9 of Melville incorporates helpful feedback from Abigail
+(real name not known), Erwin Harte, K. Ling Lo, Par Winzell, and
+Felix Croes. I thank them, and they are not responsible for 
+remaining errors.
+
+Original credits:
+
+All of the code in the Melville mudlib was written by Stephen Schmidt
+(Mobydick) with the exception of some code in the auto object, driver
+object, and user object which was written by Felix Croes (Dworkin)
+and made available as part of the DGD 1.0.a6 release.
+
+However, the ideas and concepts that lie behind that code have a much
+longer history. My first thanks go of course to Dworkin, without whom
+this mudlib would have been impossible for the obvious reason of having
+no driver on which to run. His patient explanations of the details of
+DGD and its mudlib interface cleared up many questions and much confusion.
+I also received much DGD advice from Tony Brannigan (Grendel) and Robert
+Django (Django) which is greatly appreciated and hereby acknowledged.
+
+Most of what I know about mudlib design is due to Adam Beeman (Buddha)
+my mentor and colleague at TMI-2. He is certainly the other person
+without whom this mudlib could not have been written. In working with
+him for a year and more at TMI-2 on the development of that mudlib, I
+learned the ins and outs of mudlibs and was taught the basic problems
+of design and approaches to their solution. His ideas permeate the
+Melville mudlib, and if there is anything you find good or interesting
+about it, Buddha probably had a hand in it. To him, then, is my largest
+debt and thanks.
+
+My colleagues at TMI-2 have also helped me greatly in developing this
+mudlib through their influence on my design ideas and the example of
+their own code. While they are too numerous to mention all of them,
+I wish to mention a few by name who made particular contributions.
+Robert Fuller (Archimedes) explained the principles of object oriented
+design to me and their advantages and disadvantages. The people who
+coded the original TMI mudlib did much, by example, to illustrate the
+design of the core of a mudlib. Buddha is naturally foremost among
+these, but John Garnett (Truilkan) and James Waldrop (Sulam) also
+merit mention in this category. Reimer Behrends (Ellery) has said
+much on the subject of security which has influenced me greatly in
+the design of this lib: while I have not adopted all of his ideas,
+his impact is still large in this part of the mudlib. Glenn
+Ferguson (Watcher), my other colleague at TMI-2, spent long hours
+discussing bodies with me, and in the course of that had tremendous
+influence on my ideas about bodies, switching, command processing,
+and security. His influence is probably greater that anyone else's
+except for Buddha's.
+
+In the course of explaining and discussing the TMI-2 mudlib and ways
+to improve it, many others have influenced my ideas by their opinions.
+John Viega (Rust) has provided many ideas and much discussion on
+daemonization and security. G.D. Hack (Inspiral) has contributed
+input on command processing, overall mudlib design, and efficiency/
+complexity/length considerations. Grendel, Leigh Caldwell (Blue),
+Rick Irvine (Alexus), Kenneth Lee (Guile), and Douglas Reay (Pallando)
+have all provided good ideas and served as sounding boards (and
+occasionally filters) for my own.
+
+Greg Stein (Deathblade) helped test the 0.7 release and found several
+bugs with it, which are fixed in this version.
+
+Everyone who has been connected with TMI-2, and has either offered
+code to be used in it, comments and criticisms upon it, or suggestions
+for improving it, has had some part in the creation of this mudlib.
+My thanks to them, whether named above or not, for all that they've
+done to make this mudlib possible.
+
+And my last and deepest thanks to my wife Alexandra (no mud name) who
+tolerated my long departures into virtual reality and occasionally
+yanked me back out into the Real World when I needed it. To her, all
+my love.

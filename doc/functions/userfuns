@@ -1,0 +1,113 @@
+This document describes the functions defined in user.c. It does not
+describe the functions defined in /system/user/login.c and inherited
+into user: but those functions are not very interesting anyway :)
+For each function, the exact syntax of the declaration is given followed
+by a brief explanation of what the function does.
+
+void create() ;
+create() overrides the function defined in auto.c. In this case, it
+prevents the user.c from being cloned except by the driver object,
+which is to prevent extra user objects from floating around. Such
+objects can be Bad for security.
+
+void set_player(object obj) ;
+set_player() sets the variable in the user which points to the associated
+player body. Only the driver object can call it.
+
+object query_player() ;
+query_player() returns the player object associated with this user. Any
+object may call this.
+
+int query_wizard() ;
+query_wizard() returns 1 if the user is a wizard and 0 if not. Admins
+are wizards for this purpose.
+
+void promote_to_wizard() ;
+This function can be called only by the makewiz command. If you add
+an automatic promotion room, you'll need to give it permissions to
+call this as well. It promotes a user to wizard and updates his
+permissions (and his body's permissions). It is not necessary for the
+new wizard to log out for this to take effect.
+
+static void set_name(string str) ;
+Sets the name of the user. Must be static for security.
+
+string query_name() ;
+query_name() returns the name of the user. Anyone may call it.
+
+string query_cap_name() ;
+query_cap_name() returns the capitalized name. This is stored separately
+to avoid lots of CPU-wasting calls to capitalize().
+
+static void open() ;
+open() is called from the driver when the user's connection is assigned
+to this object. The driver assigns the connection to the object returns
+by fart() in the driver object. open() prints the welcome message and
+prompts the user for his character name: it then passes control to the
+login routines in /system/user/login.c.
+
+static void close() ;
+close() is called when the driver closes the connection to the user
+object. This may occur because the player has gone net-dead, or because
+the user object has been destructed, or possibly for other reasons not
+known to me. It is static so that it may not be called externally, and
+you should never need to call it yourself. If you destruct the user object
+it will be invoked automatically.
+
+void set_in_edit (int foo) ;
+set_in_edit() sets the value of the editing variable in the user, which
+determines whether a string sent should be treated as a command (and
+command() called in the player object) or as an editor command (in which
+case edit_command() is called.) It can only be called by the associated
+player object. It should be set to 1 when the player enters the editor
+and 0 when he leaves it.
+
+int query_in_edit() ;
+query_in_edit() returns the value of the editing variable.
+
+int query_in_input() ;
+query_in_input() returns 1 if the user is currently awaiting a response
+for an input_to() call and 0 if not.
+
+void quit() ;
+quit() is used to save the user's data, remove him from the user daemon,
+and destruct the user object. It can be called only from the associated
+player object. It also logs the quit time to the usage log.
+
+void write_prompt() ;
+write_prompt() writes a command prompt to the user. It could be used
+to allow customized prompts but at the moment always sends >.
+
+void write_edit_prompt() ;
+write_edit_prompt writes the editor prompt, which is generally : if
+the user is in command mode in the editor and * followed by a backspace
+if the user is in input mode. This too could be used for customization.
+
+void catch_tell(string str) ;
+catch_tell() invokes the send_message() kfun to send the string arg
+to the user's screen.
+
+static void receive_message(string str) ;
+receive_message() is called by the driver whenever the user sends a
+string to the mud. It updates the idle timestamp, echoes a linefeed
+if needed, and then decides how to treat the message. If there is
+a pending input_to, the requested function is called with the
+message as argument. If the player is in the editor, edit_command()
+in the player is called. If not, then command() in the player is
+called. At the end an appropriate prompt is written back out.
+
+int set_input_to(object obj, string func, int flag) ;
+set_input_to() is the hook used by the input_to() auto function to 
+notify the user that input should be sent to a function and not to
+the command parsing. It stores the appropriate object and function
+name in memory. When the next string is sent, the function is called
+and the variables are cleared. If the optional flag is 1, then the
+string is not echoed back to the user (useful for passwords).
+
+int query_idle() ;
+query_idle() returns the time in seconds since the last command was
+issued by this user.
+
+int linkdead() ;
+linkdead() returns 1 if this object has an external link and 0 if
+this object is netdead.

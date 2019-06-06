@@ -1,0 +1,28 @@
+The latest version of the Melville mudlib is stored in this directory.
+
+Melville is a mudlib written by Stephen Schmidt (Mobydick) for the DGD
+driver. It is a small starter mudlib which you can use to organize a
+group of wizards for your own coding projects. It has a working mail
+system, bulletin board, channel daemon, and room system so that you can
+communicate as a group, a player/wizard/admin hierarchy of wizards to
+organize code access, and support for most traditional LP features like
+object inventories, command paths, object-defined commands, emotes and
+soul commands, and so forth. It does not have any game features such as
+combat, magic, races, or levels. This makes the mudlib more suitable
+for non-game applications as well as leaving you free to implement any
+game features you want in your own fashion. It has 51 commands,
+23 for players and the rest for wizards or admins.
+
+The current version of the lib, 0.9.1, takes up 89k compressed and will
+uncompress to 399k; it contains 142 files. It unpacks to a single directory
+calld melville which contains all of the code and supporting documentation.
+To use it, you need to download and compile the DGD driver, which is probably
+available on the same site as this. Version 0.9.1 of Melville should work
+with version 1.2 of DGD. Melville does not run over the kernel lib and 
+you can remove the kernel mudlib if you wish to run Melville (or you can
+keep the kernel in a separate directory, and have both).
+
+Questions and feedback on Melville can be directed to Mobydick at
+schmidsj@union.edu.
+
+

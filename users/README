@@ -1,0 +1,10 @@
+This directory stores the home directories of wizards, which have the
+name of the wizard in question. Thus, Mobydick's home directory is
+/users/mobydick. Note that it is not /users/m/mobydick: you may need
+to add some subdirectory structure if you have many wizards.
+The character ~ will generally be resolved to the home directory of
+this_user().
+Note also that an object loaded from a wizard's home directory does not
+have the same privileges as the wizard's body does. Notably, it will
+generally be unable to read and write files. This is especially
+important for admin home directories.

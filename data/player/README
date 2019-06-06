@@ -1,0 +1,4 @@
+Player data save files. Note that there is no subdirectory structure,
+eg ahab's data file is /data/players/ahab not /data/players/a/ahab.
+You may want to add some structure here if you anticipate having a lot
+of players.

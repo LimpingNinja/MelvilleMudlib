@@ -1,0 +1,7 @@
+This directory contains files that are commonly inherited by many different
+objects in the mudlib. For example, object.c, room.c, and board.c are all
+here. 
+Files that are inherited by only a single object generally go in a
+directory with the same name as the object that includes them, with
+the .c removed. For example, /system/user.c inherits /system/user/login.c,
+/system/player.c inherits /system/player/edit.c, and so forth.

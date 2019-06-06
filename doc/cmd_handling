@@ -1,0 +1,113 @@
+This document explains how user input is parsed and processed in the
+Melville mudlib. Each user is associated with two objects. The first,
+called the user object and cloned from /system/user.c, holds the user's
+connection and receives the messages the user sends. The second, called
+the player object and cloned from /system/player.c, is the player's
+physical representation in the mud world. It defines a short and long,
+moves through environments, recieves messages from other objects, and
+handles command processing. Each user object stores a pointer to the
+associated player object and vice-versa.
+
+Any time the user sends a string, the function receive_message() is
+called in user.c with the string sent as an argument. At any given
+time, the user object is in one of three modes: awaiting an input_to,
+in the editor, or in command mode.
+
+The function query_in_input() returns 1 if the user is awaiting an input_to
+string and 0 if not. If so, then the variable input_func holds the name of
+the function to call and the variable input_obj holds the object in which
+to call it. When receive_message() is called and input_obj is defined,
+the call is made, the string is passed, and the variables are cleared,
+so that the input_to is ended. If the user is not in input mode, then
+control passes through to the next stage.
+
+The function query_in_edit() returns 1 if the user is in the editor
+and 0 if not. The value is stored in the internal variable editing.
+If the user is in the editor, then the function edit_command() is called
+in the associated player body. This function makes sure that a legitimate
+string has been passed and then passes the command on to the editor
+instance associated with the player object. Any return message is passed
+by the editor calling receive_message() in player.c, which calls catch_tell()
+in user.c, which invokes the send_message() kfun to send the message back
+to the user.
+
+If the user is not in the editor, then the function command() is called
+in player.c. This function checks for two kinds of commands, bin commands
+and object commands. Bin commands are defined by files in /cmds and are
+separated into player commands (used by everyone, /cmds/player), wizard
+commands (used by wizards and admins, /cmds/wizard) and admin commands
+(used only by admins, /cmds/admin). Whenever a string is passed to
+command() by the user object, the player object breaks that string up
+into words separated by spaces. The function then looks for a file with
+the same name as the first word in the string passed, and calls the
+function do_command() in that file, passing the rest of the words in
+the string as an argument. For example, if the user passes the string
+"go north quietly", the object /cmds/player/go.c will be loaded (if it
+is not already loaded), and the function do_command() will be called in
+it with the string "north quietly" as an argument.
+command() will first look in /cmds/player for the named file. If it finds
+one, and if the function returns a non-zero value, then the command is
+assumed to have been successfully processed and the command() function
+returns. If no file is found, or if the function call returns zero, then
+the command() function will look in any other directories to which the
+player has access, first /cmds/wizard and then /cmds/admin. If no file
+with that name is found, or function calls into those files return 0,
+then there is no matching bin command for this string and we start looking
+at object commands.
+Any object may define a command using the add_command() autofun. First
+we look to see if the player's environment defines a command for this
+word. If it does, we call the function perform_command() in that object
+to attempt to peform the command. Again, if the return value is 1 we assume
+the command has been successfully processed and we return. If not, then
+we look at the contents of the player's inventory, then at the contents
+of the player's environment. If none of these objects define a function
+that processess this command, then we check with the soul daemon to see
+if we have a soul command. If not, then we give up, send the message
+"What?" to the user, and return.
+
+There are several things to note about this method of handling commands
+as opposed to other LPmud methods. First, the bin commands come before
+the object commands in precedence. This is faster if most of the commands
+issued are bin commands. It also makes it impossible to override important
+commands like quit, say, and go, improving security.
+Second, object commands are handled differently. LPMud 3.0 kept a running
+list of added actions, which required an init function to add new commands
+and move() support to remove them. But the objects did not have to be
+checked at runtime to see if they defined a given command or not. In this
+system, there is no need to keep tables of defined commands; but each
+object in the room or inventory of the player must be checked to see if it
+defines a particular word when no bin command parses the string. This will
+be faster at movement time but slower at command time. Which method is
+faster will depend on the relative frequency of moves and non-bin commands.
+Note also that with this system, calls to functions that define commands
+in objects come from within the object; this means that previous_object()
+will be the object. The object before that one in the trace should be
+the player's body.
+Third, there is some predictability to the ordering of object commands when
+two objects define the same command. A command defined in the player's
+room always has first priority, followed by an object in the player's
+inventory and lastly in the inventory of the room. Within the latter
+two categories, precedence is hard to predict, as it is for add_actions
+in LPMud 3, since it depends on the order of the objects in the inventory
+array of the player and the room.
+Fourth, the current system relies on detecting the file /cmds/player/go.c
+which requires disk access and may be somewhat slow. It may be wise to
+instead have a daemon object which tracks loaded commands, and check with
+that daemon for the presence or absence of a certain command before looking
+on the disk to see if it exists. This may speed performance: on the other
+hand, it increases code complexity. The current mudlib implements the
+simpler system since the gain in simplicity is know and the gain in
+performance is difficult to predict.
+
+Alias processing is done in command() in player.c. Before the user
+string is broken into words, the function process_alias(), defined
+in /system/player/shell.c and inherited into player.c, is called
+and the string passed. This function processes the string for alias
+expansion and returns either an altered string if an alias is used
+or the original string if not. This system is also very simple but
+quite inflexible, as aliases must be hardcoded and cannot be defined
+for individual players. Something better should be installed. There
+is also a call to process_history, also defined in /system/player/shell.c,
+which replaces !! with the last command, handles ^foo^bar type commands,
+and does !foo and !17 type commands.
+
