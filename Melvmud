@@ -18,7 +18,7 @@ dynamic_chunk   = 261120;               /* dynamic memory chunk */
 dump_file       = "../tmp/dump";        /* state dump file */
 dump_interval   = 3600;
 
-typechecking    = 2;                    /* global typechecking */
+typechecking    = 1;                    /* global typechecking */
 include_file    = "/include/std.h";     /* standard include file */
 include_dirs    = ({ "/include" });     /* directories to search */
 
